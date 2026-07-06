@@ -4,6 +4,49 @@
   color-scheme: dark;
 }
 
+/* ============================================================
+   ADAPTIVE FLUID SCALING
+   Root font-size scales smoothly with the screen width, so all
+   rem-based Tailwind sizes (text, padding, gaps) adapt automatically
+   to any phone — from small (320px) to large (480px+).
+   ============================================================ */
+html {
+  font-size: clamp(14px, 3.9vw, 17px);
+}
+
+/* On tablets/desktop keep a comfortable fixed base */
+@media (min-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Extra-small phones: tighten horizontal padding a touch */
+@media (max-width: 360px) {
+  .player-shell {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Album art adapts to BOTH width and height so it never overflows
+   on short screens; caps at a sensible max on big ones. */
+.player-art {
+  width: min(78vw, 46vh, 380px);
+  max-width: 380px;
+}
+
+/* On very short portrait screens shrink art & spacing further */
+@media (max-height: 680px) and (orientation: portrait) {
+  .player-art {
+    width: min(60vw, 40vh, 300px);
+    margin-bottom: 1rem;
+  }
+  .player-right > .mb-8 {
+    margin-bottom: 0.75rem;
+  }
+}
+
 html,
 body {
   height: 100%;
