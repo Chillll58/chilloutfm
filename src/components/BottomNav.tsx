@@ -1,0 +1,103 @@
+"use client";
+
+export type TabId = "player" | "playlist" | "chat" | "alarm";
+
+const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  {
+    id: "player",
+    label: "Радио",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <path
+          d="M12 3v18M8 7v10M16 7v10M4 10v4M20 10v4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "playlist",
+    label: "Плейлист",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <path
+          d="M4 6h11M4 12h11M4 18h7M17 17V9l4-1"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="16" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  {
+    id: "chat",
+    label: "Чат",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <path
+          d="M4 5h16v11H9l-4 3V5z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "alarm",
+    label: "Будильник",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <circle cx="12" cy="13" r="8" stroke="currentColor" strokeWidth="2" />
+        <path
+          d="M12 9v4l2.5 2M5 3L2 6M19 3l3 3"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+];
+
+export default function BottomNav({
+  active,
+  onChange,
+}: {
+  active: TabId;
+  onChange: (t: TabId) => void;
+}) {
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b1020]/90 backdrop-blur-xl">
+      <div
+        className="mx-auto flex w-full max-w-md items-stretch justify-around px-2 sm:max-w-lg md:max-w-2xl lg:max-w-3xl md:px-8"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {TABS.map((t) => {
+          const on = active === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => onChange(t.id)}
+              className={`flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors ${
+                on ? "text-teal-300" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <span
+                className={`transition-transform ${on ? "scale-110" : "scale-100"}`}
+              >
+                {t.icon}
+              </span>
+              <span className="text-[11px] font-medium">{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

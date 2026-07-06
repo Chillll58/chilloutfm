@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ChilloutFM</string>
+    <string name="title_activity_main">ChilloutFM</string>
+    <string name="package_name">fm.chillout.radio</string>
+    <string name="custom_url_scheme">fm.chillout.radio</string>
+    <string name="widget_description">Быстрый запуск радио ChilloutFM</string>
+</resources>

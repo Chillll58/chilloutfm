@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* ============================================================
+   LIGHT THEME SHIM
+   Centrally remaps the dark utility classes to light values
+   when <html> has the .light class, so components stay untouched.
+   Neon accents (teal / purple / pink) intentionally stay the same.
+   ============================================================ */
+html.light body {
+  background: #eef2f7;
+  color: #0f172a;
+}
+
+/* page + shell background */
+html.light .bg-\[\#0b1020\] {
+  background-color: #eef2f7 !important;
+}
+/* dark veil over the visualizer -> light veil */
+html.light .bg-\[\#0b1020\]\/55 {
+  background-color: rgba(238, 242, 247, 0.6) !important;
+}
+/* modal / picker surfaces that used deep navy */
+html.light .bg-\[\#0f1630\],
+html.light .bg-\[\#131a30\] {
+  background-color: #ffffff !important;
+}
+
+/* white-alpha surfaces -> subtle dark-alpha on light bg */
+html.light .bg-white\/5,
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.04\],
+html.light .bg-white\/\[0\.05\],
+html.light .bg-white\/\[0\.06\] {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+html.light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+html.light .bg-white\/15 {
+  background-color: rgba(15, 23, 42, 0.12) !important;
+}
+html.light .bg-white\/90 {
+  background-color: #0f172a !important;
+}
+
+/* dark scrim areas -> light neutral */
+html.light .bg-black\/20 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+html.light .bg-black\/50,
+html.light .bg-black\/60 {
+  background-color: rgba(15, 23, 42, 0.35) !important;
+}
+
+/* borders */
+html.light .border-white\/5,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+/* text colors */
+html.light .text-white,
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #0f172a !important;
+}
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+html.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* header/status bar backdrop */
+html.light .bg-\[\#0b1020\]\/90 {
+  background-color: rgba(238, 242, 247, 0.9) !important;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbars but keep scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.eq-bar {
+  animation: eq 0.9s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-slow {
+  animation: spin-slow 24s linear infinite;
+}
+
+@keyframes float-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+}
+.glow-pulse {
+  animation: float-glow 6s ease-in-out infinite;
+}
+
+/* ============================================================
+   LANDSCAPE LAYOUT (phones & small tablets in landscape)
+   Two-column player: artwork left, controls right.
+   ============================================================ */
+@media (orientation: landscape) and (max-height: 560px) {
+  .player-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 44vh) 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 1.5rem;
+    align-items: center;
+    padding-top: 0.5rem;
+  }
+  .player-shell > .status-pill {
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-bottom: 0.5rem;
+  }
+  .player-art {
+    grid-column: 1;
+    grid-row: 2;
+    margin-bottom: 0;
+    max-width: 44vh;
+  }
+  .player-right {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  /* tighten vertical spacing so everything fits */
+  .player-right > .mb-8 {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fade-up 0.35s ease both;
+}
