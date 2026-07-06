@@ -1,4 +1,4 @@
-const CACHE = "chilloutfm-v4";
+const CACHE = "chilloutfm-v5";
 const APP_SHELL = [
   "/",
   "/icons/icon-192.png",

@@ -53,7 +53,7 @@ export default function PlayerTab({
   const title = data?.current.title || (data ? "" : "Загрузка…");
 
   return (
-    <div className="player-shell flex flex-col items-center px-6 pb-28 pt-4">
+    <div className="player-shell flex flex-col items-center px-6 pb-32 pt-3">
       {/* profile switcher */}
       <div className="mb-4 flex w-full max-w-[320px] items-center gap-1.5 rounded-full border border-white/10 bg-white/5 p-1">
         <button
@@ -79,7 +79,7 @@ export default function PlayerTab({
       </div>
 
       {/* quality selector */}
-      <div className="quality-sel mb-6 mt-2 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
+      <div className="quality-sel mb-4 mt-1 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
         <button
           onClick={() => onQualityChange("sd")}
           className={`rounded-full px-3 py-1 font-medium transition ${
@@ -105,7 +105,7 @@ export default function PlayerTab({
       </div>
 
       {/* Artwork */}
-      <div className="player-art relative mb-8 aspect-square w-full max-w-[300px] sm:max-w-[340px] md:max-w-[380px]">
+      <div className="player-art relative mb-4 aspect-square w-full max-w-[300px] sm:max-w-[340px] md:max-w-[380px]">
         <div className="glow-pulse pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[115%] w-[115%] rounded-full bg-gradient-to-tr from-teal-500/40 via-purple-500/40 to-pink-500/40 blur-3xl" />
         <AlbumArt
           src={data?.current.img}
@@ -153,7 +153,7 @@ export default function PlayerTab({
       </div>
 
       {/* Listeners */}
-      <div className="mb-8 mt-3 flex items-center gap-5 text-sm text-slate-400">
+      <div className="mb-4 mt-2 flex items-center gap-5 text-sm text-slate-400">
         <span className="flex items-center gap-1.5">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
             <path
@@ -183,7 +183,7 @@ export default function PlayerTab({
       <button
         onClick={onToggle}
         aria-label={isPlaying ? "Пауза" : "Слушать"}
-        className="play-btn group relative mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-purple-500 text-[#0b1020] shadow-lg shadow-purple-500/30 transition active:scale-95"
+        className="play-btn group relative mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-purple-500 text-[#0b1020] shadow-lg shadow-purple-500/30 transition active:scale-95"
       >
         <span className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-400 to-purple-500 opacity-60 blur-lg transition group-hover:opacity-90" />
         <span className="relative">
