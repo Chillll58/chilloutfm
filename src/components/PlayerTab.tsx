@@ -53,7 +53,7 @@ export default function PlayerTab({
   const title = data?.current.title || (data ? "" : "Загрузка…");
 
   return (
-    <div className="player-shell flex flex-col items-center px-6 pt-4">
+    <div className="player-shell flex flex-col items-center px-6 pb-28 pt-4">
       {/* profile switcher */}
       <div className="mb-4 flex w-full max-w-[320px] items-center gap-1.5 rounded-full border border-white/10 bg-white/5 p-1">
         <button
@@ -78,10 +78,8 @@ export default function PlayerTab({
         </button>
       </div>
 
-      <div className="status-pill mb-6" />
-
       {/* quality selector */}
-      <div className="mb-6 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
+      <div className="quality-sel mb-6 mt-2 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
         <button
           onClick={() => onQualityChange("sd")}
           className={`rounded-full px-3 py-1 font-medium transition ${
@@ -185,7 +183,7 @@ export default function PlayerTab({
       <button
         onClick={onToggle}
         aria-label={isPlaying ? "Пауза" : "Слушать"}
-        className="group relative mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-purple-500 text-[#0b1020] shadow-lg shadow-purple-500/30 transition active:scale-95"
+        className="play-btn group relative mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-purple-500 text-[#0b1020] shadow-lg shadow-purple-500/30 transition active:scale-95"
       >
         <span className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-400 to-purple-500 opacity-60 blur-lg transition group-hover:opacity-90" />
         <span className="relative">

@@ -36,14 +36,34 @@ html {
   max-width: 380px;
 }
 
-/* On very short portrait screens shrink art & spacing further */
-@media (max-height: 680px) and (orientation: portrait) {
-  .player-art {
-    width: min(60vw, 40vh, 300px);
-    margin-bottom: 1rem;
+/* Fluid vertical spacing so the player fits any screen height.
+   Album art and gaps shrink proportionally on shorter phones. */
+.player-art {
+  width: min(80vw, 42vh, 360px);
+  margin-bottom: clamp(0.75rem, 3vh, 2rem);
+}
+
+/* compress the stacked controls' bottom margins by height */
+.player-shell .mb-8 {
+  margin-bottom: clamp(0.75rem, 2.5vh, 2rem);
+}
+.player-shell .mb-6 {
+  margin-bottom: clamp(0.5rem, 2vh, 1.5rem);
+}
+.player-shell .mb-4 {
+  margin-bottom: clamp(0.4rem, 1.5vh, 1rem);
+}
+
+/* shrink the big play button on short screens */
+@media (max-height: 720px) and (orientation: portrait) {
+  .player-shell .play-btn {
+    height: 4rem;
+    width: 4rem;
   }
-  .player-right > .mb-8 {
-    margin-bottom: 0.75rem;
+}
+@media (max-height: 620px) and (orientation: portrait) {
+  .player-art {
+    width: min(55vw, 34vh, 260px);
   }
 }
 
