@@ -78,21 +78,7 @@ export default function PlayerTab({
         </button>
       </div>
 
-      {/* status pill */}
-      <div className="status-pill mb-6 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs">
-        <span
-          className={`h-2 w-2 rounded-full ${
-            data?.online ? "bg-emerald-400" : "bg-rose-400"
-          } ${data?.online ? "animate-pulse" : ""}`}
-        />
-        <span className="font-semibold tracking-wide text-slate-200">
-          {data?.online ? "В ЭФИРЕ" : "ОФФЛАЙН"}
-        </span>
-        <span className="text-slate-500">•</span>
-        <span className="text-slate-400">
-          {quality === "hq" ? "320" : "128"} kbps
-        </span>
-      </div>
+      <div className="status-pill mb-6" />
 
       {/* quality selector */}
       <div className="mb-6 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">

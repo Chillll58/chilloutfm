@@ -4,7 +4,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // Пример: "https://chilloutfm.vercel.app"
 const serverUrl =
   process.env.CAPACITOR_SERVER_URL ||
-  "https://chilloutfm.vercel.app/";
+  "https://chilloutfm.vercel.app";
 
 const config: CapacitorConfig = {
   appId: "fm.chillout.radio",
