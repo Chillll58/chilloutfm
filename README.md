@@ -189,6 +189,6 @@ public/                 # иконки, манифест, service worker
 
 **ChilloutFM** • Интернет-радио для настроения 🎧
 
-[⬇️ Скачать APK](../../releases/latest) · [🌐 Открыть сайт](https://chilloutfm.vercel.app)
+[⬇️ Скачать APK](../../releases/latest) · [🌐 Открыть сайт](http://chilloutfm.ru/)
 
 </div>
