@@ -330,7 +330,21 @@ export type DatingFriend = typeof datingFriends.$inferSelect;
 export type LiveStream = typeof liveStreams.$inferSelect;
 export type LiveChatRow = typeof liveChat.$inferSelect;
 
+export const feedbackMessages = pgTable("feedback_messages", {
+  id: serial("id").primaryKey(),
+  clientId: text("client_id").notNull().default(""),
+  fromContact: text("from_contact").notNull().default(""),
+  subject: text("subject").notNull().default(""),
+  message: text("message").notNull(),
+  reply: text("reply").notNull().default(""),
+  repliedAt: timestamp("replied_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
+export type FeedbackMessage = typeof feedbackMessages.$inferSelect;
 export type TrackVote = typeof trackVotes.$inferSelect;
 export type MessageReaction = typeof messageReactions.$inferSelect;

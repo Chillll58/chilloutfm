@@ -34,6 +34,7 @@ type VkPost = {
   text: string;
   image: string;
   audios: { artist: string; title: string; url: string }[];
+  link?: string;
 };
 
 const HOSTS = [
@@ -265,6 +266,16 @@ export default function NewsTab() {
                       </span>
                     </button>
                   ))}
+                  {p.link && (
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#0077FF] px-3 py-1.5 text-xs font-semibold text-white"
+                    >
+                      Открыть в ВК ↗
+                    </a>
+                  )}
                 </div>
               </div>
             ))

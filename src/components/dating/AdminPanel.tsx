@@ -2,41 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type Payment = {
+type Feedback = {
   id: number;
-  payerClientId: string;
-  targetProfileId: number;
-  kind: string;
-  amount: number;
-  earnerShare: number;
-  platformShare: number;
-  status: string;
+  fromContact: string;
+  subject: string;
+  message: string;
+  reply: string;
+  repliedAt: string | null;
   createdAt: string;
-};
-
-type Earner = {
-  id: number;
-  name: string;
-  photo: string;
-  earned: number;
-  paidOut: number;
-  balance: number;
-};
-
-type Summary = {
-  totalGross: number;
-  totalPlatform: number;
-  totalEarner: number;
-  totalPaidOut: number;
-  toPayOut: number;
-};
-
-const KIND_LABEL: Record<string, string> = {
-  tip: "💝 Чаевые",
-  private: "🔒 Приват",
-  call: "📞 Телефон",
-  top: "🚀 Топ",
-  premium: "👑 Премиум",
 };
 
 export default function AdminPanel({
@@ -46,25 +19,21 @@ export default function AdminPanel({
   adminKey: string;
   onBack: () => void;
 }) {
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [earners, setEarners] = useState<Earner[]>([]);
-  const [tab, setTab] = useState<"stats" | "payments" | "payouts">("stats");
+  const [items, setItems] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
+  const [replyFor, setReplyFor] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/dating/admin", {
+      const res = await fetch("/api/feedback", {
         headers: { "x-admin-key": adminKey },
         cache: "no-store",
       });
-      const json = await res.json();
-      if (json.ok) {
-        setSummary(json.summary);
-        setPayments(json.payments ?? []);
-        setEarners(json.earners ?? []);
-      }
+      const json = (await res.json()) as { messages?: Feedback[] };
+      setItems(json.messages ?? []);
     } catch {
       /* ignore */
     } finally {
@@ -76,25 +45,37 @@ export default function AdminPanel({
     load();
   }, [load]);
 
-  const payout = async (e: Earner) => {
-    const val = window.prompt(
-      `Выплата для ${e.name}. К выплате: ${e.balance}₽.\nСумма выплаты:`,
-      String(e.balance)
-    );
-    const amount = Number(val);
-    if (!amount || amount < 1) return;
-    await fetch("/api/dating/admin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": adminKey,
-      },
-      body: JSON.stringify({ profileId: e.id, amount, note: "выплата" }),
-    });
-    window.alert(
-      `Отметил выплату ${amount}₽ для ${e.name}.\nПереведите деньги на её/его реквизиты вручную через YooMoney.`
-    );
-    load();
+  const sendReply = async (id: number) => {
+    const text = replyText.trim();
+    if (!text) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": adminKey,
+        },
+        body: JSON.stringify({ id, reply: text }),
+      });
+      const json = (await res.json()) as { ok?: boolean; emailed?: boolean };
+      if (json.ok) {
+        setReplyFor(null);
+        setReplyText("");
+        window.alert(
+          json.emailed
+            ? "Ответ отправлен пользователю на email ✅"
+            : "Ответ сохранён. (Email не отправлен — SMTP не настроен)"
+        );
+        load();
+      } else {
+        window.alert("Не удалось отправить ответ");
+      }
+    } catch {
+      window.alert("Ошибка сети");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -106,7 +87,7 @@ export default function AdminPanel({
         >
           ←
         </button>
-        <h2 className="text-lg font-bold text-white">🛡 Админ-панель</h2>
+        <h2 className="text-lg font-bold text-white">🛡 Обращения</h2>
         <button
           onClick={load}
           className="ml-auto rounded-full bg-white/5 px-3 py-1.5 text-xs text-slate-300"
@@ -115,150 +96,111 @@ export default function AdminPanel({
         </button>
       </div>
 
-      {/* tabs */}
-      <div className="mb-3 flex gap-1.5 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
-        {[
-          ["stats", "📊 Сводка"],
-          ["payments", "💰 Платежи"],
-          ["payouts", "💸 Выплаты"],
-        ].map(([k, l]) => (
-          <button
-            key={k}
-            onClick={() => setTab(k as typeof tab)}
-            className={`flex-1 rounded-full py-1.5 font-medium transition ${
-              tab === k
-                ? "bg-gradient-to-r from-teal-400 to-purple-500 text-[#0b1020]"
-                : "text-slate-300"
-            }`}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
       {loading ? (
         <p className="py-10 text-center text-sm text-slate-500">Загрузка…</p>
-      ) : tab === "stats" && summary ? (
+      ) : items.length === 0 ? (
+        <p className="py-10 text-center text-sm text-slate-500">
+          Обращений пока нет
+        </p>
+      ) : (
         <div className="space-y-3">
-          <Stat label="💵 Всего получено" value={summary.totalGross} big />
-          <div className="grid grid-cols-2 gap-3">
-            <Stat label="🏦 Моя прибыль" value={summary.totalPlatform} accent="teal" />
-            <Stat label="👥 Исполнителям (70%)" value={summary.totalEarner} accent="pink" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Stat label="✅ Выплачено" value={summary.totalPaidOut} accent="slate" />
-            <Stat label="⏳ К выплате" value={summary.toPayOut} accent="amber" />
-          </div>
-          <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400">
-            Все платежи поступают на ваш кошелёк YooMoney. «Моя прибыль» — ваша
-            доля (30% с услуг + 100% с продвижения/премиума). «К выплате» —
-            сколько нужно перевести исполнителям.
-          </p>
-        </div>
-      ) : tab === "payments" ? (
-        <div className="space-y-2">
-          {payments.length === 0 ? (
-            <p className="py-10 text-center text-sm text-slate-500">Платежей пока нет</p>
-          ) : (
-            payments.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white">
-                    {KIND_LABEL[p.kind] ?? p.kind} · {p.amount}₽
-                  </p>
-                  <p className="truncate text-[11px] text-slate-400">
-                    от {p.payerClientId.slice(0, 12)}… ·{" "}
-                    {new Date(p.createdAt).toLocaleString("ru-RU")}
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    p.status === "paid"
-                      ? "bg-emerald-400/20 text-emerald-300"
-                      : "bg-amber-400/20 text-amber-300"
-                  }`}
-                >
-                  {p.status === "paid" ? "оплачен" : "ожидание"}
+          {items.map((f) => (
+            <div
+              key={f.id}
+              className="rounded-2xl border border-white/10 bg-white/5 p-3"
+            >
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="truncate text-sm font-semibold text-white">
+                  {f.subject || "Без темы"}
+                </span>
+                <span className="flex-shrink-0 text-[10px] text-slate-500">
+                  {new Date(f.createdAt).toLocaleString("ru-RU")}
                 </span>
               </div>
-            ))
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {earners.length === 0 ? (
-            <p className="py-10 text-center text-sm text-slate-500">
-              Нет заработков для выплаты
-            </p>
-          ) : (
-            earners.map((e) => (
-              <div
-                key={e.id}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5"
-              >
-                {e.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={e.photo} alt="" className="h-10 w-10 rounded-full object-cover" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                    👤
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">{e.name}</p>
-                  <p className="text-[11px] text-slate-400">
-                    Заработано {e.earned}₽ · выплачено {e.paidOut}₽
+              <p className="whitespace-pre-wrap break-words text-sm text-slate-200">
+                {f.message}
+              </p>
+              {f.fromContact && (
+                <p className="mt-2 text-[11px] text-teal-300">
+                  Контакт: {f.fromContact}
+                </p>
+              )}
+
+              {/* уже отвечено */}
+              {f.reply ? (
+                <div className="mt-2 rounded-xl border border-teal-400/30 bg-teal-400/10 p-2.5">
+                  <p className="mb-1 text-[10px] font-semibold text-teal-300">
+                    Ваш ответ
+                    {f.repliedAt
+                      ? ` · ${new Date(f.repliedAt).toLocaleString("ru-RU")}`
+                      : ""}
                   </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-amber-300">{e.balance}₽</p>
+                  <p className="whitespace-pre-wrap break-words text-sm text-slate-100">
+                    {f.reply}
+                  </p>
                   <button
-                    onClick={() => payout(e)}
-                    disabled={e.balance < 1}
-                    className="mt-1 rounded-full bg-gradient-to-r from-teal-400 to-purple-500 px-3 py-1 text-[11px] font-semibold text-[#0b1020] disabled:opacity-40"
+                    onClick={() => {
+                      setReplyFor(f.id);
+                      setReplyText(f.reply);
+                    }}
+                    className="mt-2 text-[11px] text-slate-400"
                   >
-                    Выплатить
+                    ✏️ Изменить ответ
                   </button>
                 </div>
-              </div>
-            ))
-          )}
+              ) : replyFor === f.id ? null : (
+                <button
+                  onClick={() => {
+                    setReplyFor(f.id);
+                    setReplyText("");
+                  }}
+                  className="mt-2 rounded-full bg-gradient-to-r from-teal-400 to-purple-500 px-4 py-1.5 text-xs font-semibold text-[#0b1020]"
+                >
+                  ✉️ Ответить
+                </button>
+              )}
+
+              {/* форма ответа */}
+              {replyFor === f.id && (
+                <div className="mt-2">
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    rows={3}
+                    placeholder="Ваш ответ пользователю…"
+                    className="no-scrollbar mb-2 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-teal-400/50"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setReplyFor(null)}
+                      className="flex-1 rounded-xl border border-white/10 py-2 text-xs text-slate-300"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      onClick={() => void sendReply(f.id)}
+                      disabled={sending || !replyText.trim()}
+                      className="flex-1 rounded-xl bg-gradient-to-r from-teal-400 to-purple-500 py-2 text-xs font-bold text-[#0b1020] disabled:opacity-40"
+                    >
+                      {sending ? "Отправка…" : "Отправить ответ"}
+                    </button>
+                  </div>
+                  {f.fromContact.includes("@") ? (
+                    <p className="mt-1 text-[10px] text-slate-500">
+                      Ответ уйдёт на email {f.fromContact} (если настроен SMTP)
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[10px] text-amber-300/70">
+                      У пользователя не email — ответ сохранится, свяжитесь по:{" "}
+                      {f.fromContact || "контакт не указан"}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  big,
-  accent = "white",
-}: {
-  label: string;
-  value: number;
-  big?: boolean;
-  accent?: string;
-}) {
-  const color =
-    accent === "teal"
-      ? "text-teal-300"
-      : accent === "pink"
-        ? "text-pink-300"
-        : accent === "amber"
-          ? "text-amber-300"
-          : accent === "slate"
-            ? "text-slate-300"
-            : "text-white";
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className={`font-bold ${big ? "text-3xl" : "text-xl"} ${color}`}>
-        {value.toLocaleString("ru-RU")} ₽
-      </p>
     </div>
   );
 }

@@ -18,6 +18,13 @@ import SplashScreen from "./SplashScreen";
 import ReactiveBackground from "./ReactiveBackground";
 import PremiumModal from "./PremiumModal";
 import NewsTab from "./NewsTab";
+import ContactsTab from "./ContactsTab";
+import UpdateBanner from "./UpdateBanner";
+import {
+  countMyReplies,
+  getSeenReplies,
+  markRepliesSeen,
+} from "@/lib/feedbackBadge";
 import {
   scheduleNativeAlarm,
   cancelNativeAlarm,
@@ -53,6 +60,7 @@ function parseTab(input: string | null): TabId {
   if (
     input === "playlist" ||
     input === "news" ||
+    input === "contacts" ||
     input === "chat" ||
     input === "alarm"
   ) {
@@ -84,6 +92,7 @@ export default function RadioApp() {
   const wakeLockRef = useRef<WakeLockHandle | null>(null);
 
   const [tab, setTab] = useState<TabId>("player");
+  const [feedbackBadge, setFeedbackBadge] = useState(false);
   const [data, setData] = useState<NowPlaying | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -151,6 +160,27 @@ export default function RadioApp() {
       setNotificationPermission(Notification.permission);
     }
   }, []);
+
+  // проверка новых ответов на обращения (бейдж на вкладке Контакты)
+  useEffect(() => {
+    const check = async () => {
+      const total = await countMyReplies();
+      setFeedbackBadge(total > getSeenReplies());
+    };
+    check();
+    const id = window.setInterval(check, 30000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // при открытии вкладки Контакты — отмечаем ответы просмотренными
+  useEffect(() => {
+    if (tab === "contacts") {
+      void countMyReplies().then((total) => {
+        markRepliesSeen(total);
+        setFeedbackBadge(false);
+      });
+    }
+  }, [tab]);
 
   useEffect(() => {
     localStorage.setItem("chillout_alarm", JSON.stringify(alarm));
@@ -769,6 +799,8 @@ export default function RadioApp() {
         </div>
       </header>
 
+      <UpdateBanner />
+
       <main
         className={
           tab === "chat"
@@ -816,6 +848,7 @@ export default function RadioApp() {
             onCancelSleep={cancelSleepTimer}
           />
         )}
+        {tab === "contacts" && <ContactsTab />}
       </main>
 
       {tab !== "player" && (
@@ -881,7 +914,11 @@ export default function RadioApp() {
         </button>
       )}
 
-      <BottomNav active={tab} onChange={setTab} />
+      <BottomNav
+        active={tab}
+        onChange={setTab}
+        badges={{ contacts: feedbackBadge }}
+      />
 
       <PremiumModal
         open={premiumModal}

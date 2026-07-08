@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// Сервисный ключ доступа ВК (создаётся в настройках VK-приложения)
+// Сервисный ключ доступа ВК (из настроек VK-приложения)
 const VK_SERVICE_TOKEN = process.env.VK_SERVICE_TOKEN || "";
-const GROUP_DOMAIN = "chillou_fm"; // vk.com/chillou_fm
+const GROUP_DOMAIN = process.env.VK_GROUP_DOMAIN || "chillou_fm";
 
 type VkPost = {
   id: number;
@@ -15,13 +15,10 @@ type VkPost = {
 };
 
 export async function GET() {
+  const groupUrl = `https://vk.com/${GROUP_DOMAIN}`;
+
   if (!VK_SERVICE_TOKEN) {
-    return Response.json({
-      ok: false,
-      reason: "notoken",
-      groupUrl: `https://vk.com/${GROUP_DOMAIN}`,
-      posts: [],
-    });
+    return Response.json({ ok: false, reason: "notoken", groupUrl, posts: [] });
   }
 
   try {
@@ -39,12 +36,16 @@ export async function GET() {
       response?: {
         items?: Array<{
           id: number;
+          owner_id?: number;
+          from_id?: number;
           date: number;
           text?: string;
           attachments?: Array<{
             type: string;
             photo?: { sizes?: Array<{ url: string; width: number }> };
             audio?: { artist?: string; title?: string; url?: string };
+            video?: { image?: Array<{ url: string; width: number }> };
+            link?: { photo?: { sizes?: Array<{ url: string; width: number }> } };
           }>;
         }>;
       };
@@ -56,52 +57,50 @@ export async function GET() {
         ok: false,
         reason: "apierror",
         error: json.error?.error_msg ?? "unknown",
-        groupUrl: `https://vk.com/${GROUP_DOMAIN}`,
+        groupUrl,
         posts: [],
       });
     }
 
-    const posts: VkPost[] = json.response.items.map((it) => {
-      let image = "";
-      const audios: VkPost["audios"] = [];
-      for (const a of it.attachments ?? []) {
-        if (a.type === "photo" && a.photo?.sizes?.length && !image) {
-          const best = a.photo.sizes.reduce((p, c) =>
-            c.width > p.width ? c : p
-          );
-          image = best.url;
-        }
-        if (a.type === "audio" && a.audio) {
-          audios.push({
-            artist: a.audio.artist ?? "",
-            title: a.audio.title ?? "",
-            url: a.audio.url ?? "",
-          });
-        }
-      }
-      return {
-        id: it.id,
-        date: it.date,
-        text: it.text ?? "",
-        image,
-        audios,
-        link: `https://vk.com/${GROUP_DOMAIN}?w=wall-${
-          json.response?.items ? "" : ""
-        }`,
-      };
-    });
+    const pickBest = (sizes?: Array<{ url: string; width: number }>) => {
+      if (!sizes?.length) return "";
+      return sizes.reduce((p, c) => (c.width > p.width ? c : p)).url;
+    };
 
-    return Response.json({
-      ok: true,
-      groupUrl: `https://vk.com/${GROUP_DOMAIN}`,
-      posts,
-    });
+    const posts: VkPost[] = json.response.items
+      .map((it) => {
+        let image = "";
+        const audios: VkPost["audios"] = [];
+        for (const a of it.attachments ?? []) {
+          if (a.type === "photo" && !image) image = pickBest(a.photo?.sizes);
+          if (a.type === "video" && !image) image = pickBest(a.video?.image);
+          if (a.type === "link" && !image)
+            image = pickBest(a.link?.photo?.sizes);
+          if (a.type === "audio" && a.audio && a.audio.url) {
+            audios.push({
+              artist: a.audio.artist ?? "",
+              title: a.audio.title ?? "",
+              url: a.audio.url ?? "",
+            });
+          }
+        }
+        const owner = it.owner_id ?? it.from_id ?? 0;
+        return {
+          id: it.id,
+          date: it.date,
+          text: it.text ?? "",
+          image,
+          audios,
+          link: owner
+            ? `https://vk.com/wall${owner}_${it.id}`
+            : groupUrl,
+        };
+      })
+      // показываем посты с текстом или картинкой
+      .filter((p) => p.text || p.image);
+
+    return Response.json({ ok: true, groupUrl, posts });
   } catch {
-    return Response.json({
-      ok: false,
-      reason: "fetch",
-      groupUrl: `https://vk.com/${GROUP_DOMAIN}`,
-      posts: [],
-    });
+    return Response.json({ ok: false, reason: "fetch", groupUrl, posts: [] });
   }
 }

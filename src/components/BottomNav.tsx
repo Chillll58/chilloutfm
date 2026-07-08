@@ -1,6 +1,12 @@
 "use client";
 
-export type TabId = "player" | "playlist" | "news" | "chat" | "alarm";
+export type TabId =
+  | "player"
+  | "playlist"
+  | "news"
+  | "chat"
+  | "alarm"
+  | "contacts";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   {
@@ -78,14 +84,31 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    id: "contacts",
+    label: "Контакты",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <path
+          d="M4 5h16v14H4V5zM4 7l8 6 8-6"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export default function BottomNav({
   active,
   onChange,
+  badges,
 }: {
   active: TabId;
   onChange: (t: TabId) => void;
+  badges?: Partial<Record<TabId, boolean>>;
 }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b1020]/90 backdrop-blur-xl">
@@ -100,7 +123,7 @@ export default function BottomNav({
             <button
               key={t.id}
               onClick={() => onChange(t.id)}
-              className={`flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-0.5 px-0.5 py-2 transition-colors ${
                 on
                   ? accent
                     ? "text-pink-400"
@@ -109,11 +132,18 @@ export default function BottomNav({
               }`}
             >
               <span
-                className={`transition-transform ${on ? "scale-110" : "scale-100"}`}
+                className={`relative transition-transform ${
+                  on ? "scale-110" : "scale-100"
+                }`}
               >
                 {t.icon}
+                {badges?.[t.id] && (
+                  <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full border-2 border-[#0b1020] bg-rose-500" />
+                )}
               </span>
-              <span className="text-[10px] font-medium">{t.label}</span>
+              <span className="text-[9px] font-medium leading-tight">
+                {t.label}
+              </span>
             </button>
           );
         })}
