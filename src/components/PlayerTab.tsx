@@ -1,7 +1,57 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { NowPlaying } from "@/lib/types";
 import AlbumArt from "./AlbumArt";
+
+const STATION_URL = "https://myradio24.com/8795";
+
+function StationFavorite({ count }: { count: number }) {
+  const [faved, setFaved] = useState(false);
+
+  useEffect(() => {
+    setFaved(localStorage.getItem("chillout_station_fav") === "1");
+  }, []);
+
+  const toggle = () => {
+    const next = !faved;
+    setFaved(next);
+    localStorage.setItem("chillout_station_fav", next ? "1" : "0");
+    navigator.vibrate?.(20);
+    if (next) {
+      // синхронизация с сервисом: открываем страницу станции,
+      // где лайк регистрируется в аккаунте myradio24
+      window.open(STATION_URL, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  // оптимистично показываем +1, если пользователь добавил в избранное
+  const shown = count + (faved ? 1 : 0);
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label="В избранное станции"
+      className={`flex items-center gap-1.5 transition active:scale-90 ${
+        faved ? "text-pink-400" : "text-slate-400"
+      }`}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4"
+        fill={faved ? "currentColor" : "none"}
+      >
+        <path
+          d="M12 21s-7-4.35-9.5-8.5C1 9 3 5.5 6.5 5.5c2 0 3.5 1.5 5.5 3.5 2-2 3.5-3.5 5.5-3.5C21 5.5 23 9 21.5 12.5 19 16.65 12 21 12 21z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {shown}
+    </button>
+  );
+}
 
 function Equalizer({ active }: { active: boolean }) {
   return (
@@ -79,7 +129,7 @@ export default function PlayerTab({
       </div>
 
       {/* quality selector */}
-      <div className="quality-sel mb-4 mt-1 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
+      <div className="mb-4 flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
         <button
           onClick={() => onQualityChange("sd")}
           className={`rounded-full px-3 py-1 font-medium transition ${
@@ -166,17 +216,7 @@ export default function PlayerTab({
           </svg>
           {data?.listeners ?? 0} слушают
         </span>
-        <span className="flex items-center gap-1.5">
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-            <path
-              d="M12 21s-7-4.35-9.5-8.5C1 9 3 5.5 6.5 5.5c2 0 3.5 1.5 5.5 3.5 2-2 3.5-3.5 5.5-3.5C21 5.5 23 9 21.5 12.5 19 16.65 12 21 12 21z"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {data?.favorites ?? 0}
-        </span>
+        <StationFavorite count={data?.favorites ?? 0} />
       </div>
 
       {/* Play button */}

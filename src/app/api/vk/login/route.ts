@@ -7,6 +7,13 @@ const VK_APP_ID = process.env.VK_APP_ID || "";
 function baseUrl(request: Request): string {
   const env = process.env.APP_BASE_URL;
   if (env) return env.replace(/\/$/, "");
+  // реальный публичный домен из заголовков прокси (Vercel и др.)
+  const h = request.headers;
+  const host = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = h.get("x-forwarded-proto") || "https";
+  if (host && !host.startsWith("0.0.0.0") && !host.startsWith("localhost")) {
+    return `${proto}://${host}`;
+  }
   const url = new URL(request.url);
   return `${url.protocol}//${url.host}`;
 }

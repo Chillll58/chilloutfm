@@ -23,8 +23,11 @@
 ### 📲 Скачать приложение
 
 [![Download APK](https://img.shields.io/badge/⬇️_Скачать_APK-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](../../releases/latest)
+[![Инструкция PDF](https://img.shields.io/badge/📄_Инструкция-PDF-EF4444?style=for-the-badge)](public/download/ChilloutFM-instrukciya.pdf)
 
 **[👉 Последняя версия ChilloutFM для Android](../../releases/latest)**
+
+**[📖 Полная инструкция по запуску (PDF)](public/download/ChilloutFM-instrukciya.pdf)**
 
 </div>
 
@@ -189,6 +192,6 @@ public/                 # иконки, манифест, service worker
 
 **ChilloutFM** • Интернет-радио для настроения 🎧
 
-[⬇️ Скачать APK](../../releases/latest) · [🌐 Открыть сайт](http://chilloutfm.ru/)
+[⬇️ Скачать APK](../../releases/latest) · [🌐 Открыть сайт](https://chilloutfm.vercel.app)
 
 </div>

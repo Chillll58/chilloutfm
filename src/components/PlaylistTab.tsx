@@ -13,7 +13,8 @@ import {
 } from "@/lib/favorites";
 import type { VoteAgg } from "@/app/api/votes/route";
 import { popularityScore } from "@/lib/popularity";
-import { youtubeSearch, vkSearch } from "@/lib/premium";
+import { youtubeSearch, vkSearch, downloadSearch } from "@/lib/premium";
+
 
 type VotesMap = Record<string, VoteAgg>;
 
@@ -417,9 +418,7 @@ function TrackRow({
 function DownloadRow({ track, premium }: { track: Track; premium: boolean }) {
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
-      <span className="text-[11px] text-slate-400">
-        {premium ? "👑 Скачать:" : "Найти:"}
-      </span>
+      <span className="text-[11px] text-slate-400">Поиск:</span>
       <a
         href={youtubeSearch(track.artist, track.title)}
         target="_blank"
@@ -436,8 +435,19 @@ function DownloadRow({ track, premium }: { track: Track; premium: boolean }) {
       >
         🎵 ВК
       </a>
-      {premium && (
-        <span className="text-[10px] text-amber-300/70">высокое качество</span>
+      {premium ? (
+        <a
+          href={downloadSearch(track.artist, track.title)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-400/20 to-yellow-500/20 px-2.5 py-1 text-[11px] font-semibold text-amber-200 transition active:scale-95"
+        >
+          ⬇️ Скачать
+        </a>
+      ) : (
+        <span className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-500">
+          👑 Скачать
+        </span>
       )}
     </div>
   );

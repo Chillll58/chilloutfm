@@ -17,6 +17,13 @@ import PlaylistTab from "./PlaylistTab";
 import SplashScreen from "./SplashScreen";
 import ReactiveBackground from "./ReactiveBackground";
 import PremiumModal from "./PremiumModal";
+import NewsTab from "./NewsTab";
+import {
+  scheduleNativeAlarm,
+  cancelNativeAlarm,
+  onAlarmTapped,
+} from "@/lib/nativeAlarm";
+
 import {
   getFavorites,
   isFavorite as isFavArtist,
@@ -43,7 +50,12 @@ type WakeLockHandle = {
 };
 
 function parseTab(input: string | null): TabId {
-  if (input === "playlist" || input === "chat" || input === "alarm") {
+  if (
+    input === "playlist" ||
+    input === "news" ||
+    input === "chat" ||
+    input === "alarm"
+  ) {
     return input;
   }
   return "player";
@@ -89,6 +101,7 @@ export default function RadioApp() {
   const [premium, setPremium] = useState(false);
   const [quality, setQuality] = useState<"sd" | "hq">("sd");
   const [premiumModal, setPremiumModal] = useState(false);
+
   const streamTriedFallback = useRef(false);
   const [sleepEndsAt, setSleepEndsAt] = useState<number | null>(null);
   const [sleepLeft, setSleepLeft] = useState<number>(0);
@@ -141,6 +154,12 @@ export default function RadioApp() {
 
   useEffect(() => {
     localStorage.setItem("chillout_alarm", JSON.stringify(alarm));
+    // нативный будильник: срабатывает даже при закрытом приложении
+    if (alarm.enabled) {
+      void scheduleNativeAlarm(alarm.time);
+    } else {
+      void cancelNativeAlarm();
+    }
   }, [alarm]);
 
   const fetchNowPlaying = useCallback(async () => {
@@ -173,10 +192,9 @@ export default function RadioApp() {
   }, []);
 
   const streamUrl = useCallback(() => {
-    // premium HQ = 320; free/SD = 128 (falls back to main if 128 not enabled)
-    if (premium && quality === "hq") return STREAM_HQ;
-    return streamTriedFallback.current ? STREAM_HQ : STREAM_SD;
-  }, [premium, quality]);
+    // единый рабочий поток
+    return STREAM_HQ;
+  }, []);
 
   const play = useCallback(
     async (fade = false) => {
@@ -248,8 +266,6 @@ export default function RadioApp() {
 
     reconnectingRef.current = true;
     setIsLoading(true);
-    // if SD (128) mount failed once, fall back to the main working stream
-    if (quality === "sd" || !premium) streamTriedFallback.current = true;
     try {
       audio.src = `${streamUrl()}?_=${Date.now()}`;
       audio.load();
@@ -327,6 +343,17 @@ export default function RadioApp() {
     setRinging(false);
     pause();
   }, [pause]);
+
+  // запуск радио при нажатии на нативное уведомление будильника
+  useEffect(() => {
+    void onAlarmTapped(() => {
+      setTab("player");
+      setRinging(true);
+      void play(false);
+      // перепланировать на следующий день
+      if (alarm.enabled) void scheduleNativeAlarm(alarm.time);
+    });
+  }, [play, alarm.enabled, alarm.time]);
 
   const snoozeAlarm = useCallback(() => {
     setRinging(false);
@@ -584,7 +611,6 @@ export default function RadioApp() {
       setQuality("hq");
       return;
     }
-    // не премиум — показываем окно с описанием и переходом на поддержку
     setPremiumModal(true);
   }, []);
 
@@ -771,6 +797,7 @@ export default function RadioApp() {
           />
         )}
         {tab === "playlist" && <PlaylistTab data={data} premium={premium} />}
+        {tab === "news" && <NewsTab />}
         {tab === "chat" && <ChatTab active={tab === "chat"} />}
         {tab === "alarm" && (
           <AlarmTab

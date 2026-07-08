@@ -1,6 +1,6 @@
 "use client";
 
-export type TabId = "player" | "playlist" | "chat" | "alarm";
+export type TabId = "player" | "playlist" | "news" | "chat" | "alarm";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   {
@@ -30,6 +30,21 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
           strokeLinejoin="round"
         />
         <circle cx="16" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  {
+    id: "news",
+    label: "Новости",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+        <path
+          d="M4 5h13v14H6a2 2 0 01-2-2V5zM17 8h2a1 1 0 011 1v8a2 2 0 01-2 2M7 8h7M7 12h7M7 16h4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -75,17 +90,22 @@ export default function BottomNav({
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b1020]/90 backdrop-blur-xl">
       <div
-        className="mx-auto flex w-full max-w-md items-stretch justify-around px-2 sm:max-w-lg md:max-w-2xl lg:max-w-3xl md:px-8"
+        className="mx-auto flex w-full max-w-md items-stretch justify-around px-1 sm:max-w-lg md:max-w-2xl lg:max-w-3xl md:px-8"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {TABS.map((t) => {
           const on = active === t.id;
+          const accent = false;
           return (
             <button
               key={t.id}
               onClick={() => onChange(t.id)}
               className={`flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors ${
-                on ? "text-teal-300" : "text-slate-400 hover:text-slate-200"
+                on
+                  ? accent
+                    ? "text-pink-400"
+                    : "text-teal-300"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <span
@@ -93,7 +113,7 @@ export default function BottomNav({
               >
                 {t.icon}
               </span>
-              <span className="text-[11px] font-medium">{t.label}</span>
+              <span className="text-[10px] font-medium">{t.label}</span>
             </button>
           );
         })}

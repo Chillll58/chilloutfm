@@ -48,7 +48,7 @@ export default function AlarmTab({
   onStartSleep: (minutes: number) => void;
   onCancelSleep: () => void;
 }) {
-  const sleepPresets = [15, 30, 45, 60, 90];
+  const sleepPresets = [15, 30, 45, 60, 120];
   const sleepText = (() => {
     const total = Math.max(0, Math.floor(sleepLeftMs / 1000));
     const h = Math.floor(total / 3600);
@@ -127,11 +127,7 @@ export default function AlarmTab({
                     : "border-white/10 bg-white/[0.04] text-slate-300"
                 }`}
               >
-                {min < 60
-                  ? `${min} мин`
-                  : min === 60
-                    ? "1 час"
-                    : `${min / 60} ч ${min % 60 ? (min % 60) + " мин" : ""}`.trim()}
+                {min < 60 ? `${min} мин` : `${min / 60} ч`}
               </button>
             ))}
           </div>

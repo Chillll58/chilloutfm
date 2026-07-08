@@ -67,3 +67,9 @@ export function vkSearch(artist: string, title: string): string {
   const q = encodeURIComponent(`${artist} ${title}`.trim());
   return `https://vk.com/audio?q=${q}`;
 }
+
+// Прямое скачивание mp3 (сервис с бесплатной загрузкой по поиску)
+export function downloadSearch(artist: string, title: string): string {
+  const q = encodeURIComponent(`${artist} ${title}`.trim());
+  return `https://mp3party.net/search?q=${q}`;
+}
